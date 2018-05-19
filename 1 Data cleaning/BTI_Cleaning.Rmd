@@ -3,7 +3,14 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-```{r Reading files, include=FALSE}
+This markdown is the one in charge of preparing the dataset for cleaningz
+
+```{r libraries, include=FALSE}
+library(dplyr)
+```
+
+**Step 1:** Read the files and understand what columns are needed to add or remove.
+```{r Reading files, echo=FALSE}
 library(dplyr)
 # Read files
 Data_Source = 'BTI'
@@ -11,24 +18,56 @@ file = paste("../Data/", Data_Source,"/", Data_Source, ".csv", sep = "")
 df = read.csv(file, sep = ",")
 fileIND = paste("../Data/", Data_Source,"/", Data_Source, "IND.csv", sep = "")
 df_IND = read.csv(fileIND, sep = ",")
-
+print(Data_Source)
+print(paste0("df_IND --> ", dim(df_IND)[1], " x ", dim(df_IND)[2]))
+colnames(df_IND)
+print(paste0("df --> ", dim(df)[1], " x ", dim(df)[2]))
+colnames(df)
+head(df_IND)
+head(df)
+```
+**Step 2:** Drop empty columns
+```{r Drop unused columns}
 # Drop unused columns
-
-
 dropIND = c("Rank", "Category_11",  "Category_12",  "Category_13", "Category_14", "Category_15",  "Category_21",  "Category_22", "Category_23", "Category_24" ,"Category_25", "Category_31", "Category_32", "Category_33", "Category_34",  "New1", "New2", "New3","New4", "New5", "keyN")
 df_IND = df_IND[ ,!(names(df_IND) %in% dropIND)]
-dim(df)
 
+drop = c('keyN', 'Indicator_Id')
+df = df[ ,!(names(df) %in% drop)]
 ```
 
-### Reading files
+**Step 3:** Create Unique identifier - Indicator_ID and Indicator
+```{r}
+# Create ID in df_IND
+df_IND = df_IND %>% mutate(Display_Name_number = row_number())
+df_IND = df_IND %>% mutate(Indicator_Id = paste(Display_Name_number, Dataset, answer, sep = "-"))
+df_IND = df_IND %>% mutate(Indicator = paste(Display_Name, Dataset, answer, sep = "-"))
+dropIND = c("Display_Name_number")
+df_IND = df_IND[ ,!(names(df_IND) %in% dropIND)]
+print(df_IND)
+
+# Create ID in df
+df = df %>% mutate(Indicator = paste(question, dataset, answer, sep = "-"))
+df = merge(df, df_IND[,c('Indicator','Indicator_Id')], by.x = 'Indicator', by.y = 'Indicator', all = T)
+
+print(df)
+```
+
+*******************************************************************************************************************
+
+*******************************************************************************************************************
+
+**Step 4:** Rescue the metadata from the hierarchy file and tokenize the Display.Name to make sure you can do correctly the left join later.
 
 ```{r}
-plot(cars)
+Hierarchy = read.csv("../Data/hierarchy.indicators 12.31.17.csv")
+Hierarchy = Hierarchy %>% filter(Dataset == Data_Source)
+print(Hierarchy)
+
+## Tokenize
+
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+**Step 5:** Left join between df_IND and Hierarchy.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
