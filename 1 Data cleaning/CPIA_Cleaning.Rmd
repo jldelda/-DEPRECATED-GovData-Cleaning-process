@@ -134,7 +134,7 @@ setdiff(df$Indicator_Id, Master_IND$Indicator_Id)
 setdiff(df$Indicator, Master_IND$Indicator)
 ```
 
-**Step 7:** Make sure the columns you have, match with the ones you need.
+**Step 7:** Make sure the columns of Master_IND you have, match with the ones you need.
 ```{r}
 # Rename columns
 colnames = colnames(Master_IND)
@@ -147,22 +147,29 @@ colnames = gsub('Category.1.3','Category_13', colnames)
 colnames = gsub('Category.1.4','Category_14', colnames)
 colnames = gsub('Category.1.5','Category_15', colnames)
 colnames = gsub('Rank.2','Rank_2', colnames)
-colnames = gsub('Category.2.2','Category_12', colnames)
-colnames = gsub('Category.2.3','Category_13', colnames)
-colnames = gsub('Category.2.4','Category_14', colnames)
-colnames = gsub('Category.2.5','Category_15', colnames)
+colnames = gsub('Category.2.1','Category_21', colnames)
+colnames = gsub('Category.2.2','Category_22', colnames)
+colnames = gsub('Category.2.3','Category_23', colnames)
+colnames = gsub('Category.2.4','Category_24', colnames)
+colnames = gsub('Category.2.5','Category_25', colnames)
+colnames = gsub('Rank.3','Rank_3', colnames)
+colnames = gsub('Category.3.1','Category_31', colnames)
+colnames = gsub('Category.3.2','Category_32', colnames)
+colnames = gsub('Category.3.3','Category_33', colnames)
+colnames = gsub('Category.3.4','Category_34', colnames)
+colnames(Master_IND) = colnames
 
+# Create empty columns
+Master_IND$overlap = ''
+Master_IND$Indicator_Code = ''
+Master_IND$Description = ''
 
-
-
-
+#Read final file from 2017
 GovDataIND360 = read.csv("../Data preprocessed/GovData360IND.csv", sep = ";")
-cols = colnames(GovDataIND360)
-col_Master_IND = colnames(Master_IND)
-setdiff(cols, col_Master_IND)
 
+setdiff(colnames(Master_IND), colnames(GovDataIND360))
+setdiff(colnames(GovDataIND360), colnames(Master_IND))
 ```
-
 
 **Step 8:** Write in csv the result
 ```{r}

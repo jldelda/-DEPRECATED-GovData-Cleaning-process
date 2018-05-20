@@ -15,9 +15,9 @@ library(stringr)
 library(dplyr)
 # Read files
 Data_Source = 'BTI'
-file = paste("../Data/", Data_Source,"/", Data_Source, ".csv", sep = "")
+file = paste("../Data preprocessed/", Data_Source,"/", Data_Source, ".csv", sep = "")
 df = read.csv(file, sep = ",")
-fileIND = paste("../Data/", Data_Source,"/", Data_Source, "IND.csv", sep = "")
+fileIND = paste("../Data preprocessed/", Data_Source,"/", Data_Source, "IND.csv", sep = "")
 df_IND = read.csv(fileIND, sep = ",")
 print(Data_Source)
 print(paste0("df_IND --> ", dim(df_IND)[1], " x ", dim(df_IND)[2]))
@@ -63,7 +63,7 @@ print(df)
 **Step 4:** Rescue the metadata from the hierarchy file and tokenize the Display.Name to make sure you can do correctly the left join later.
 
 ```{r}
-Hierarchy = read.csv("../Data/hierarchy.indicators 12.31.17.csv")
+Hierarchy = read.csv("../Data preprocessed/hierarchy.indicators 12.31.17.csv")
 #Hierarchy = read.csv("../Data/GovData360IND.csv", sep = ";")
 #colnames(Hierarchy)[5] = c('Display.Name')
 Hierarchy = Hierarchy %>% filter(Dataset == Data_Source)
@@ -88,7 +88,7 @@ The indicators that do not match, will have the categories and some other column
 **Step 5:** Left join between df_IND and Hierarchy.
 
 ```{r}
-Hierarchy = Hierarchy %>% select('Indicator', 'Value.Type.Slug','Value.Type.Descriptor', 'Units', 'Rank.1', "Category.1.2", "Category.1.3", "Category.1.4", "Category.1.5", "Rank.2", "Category.2.1", "Category.2.2", "Category.2.3", "Category.2.4", "Category.2.5", "Rank.3","Category.3.1", "Category.3.2", "Category.3.3", "Category.3.4")
+Hierarchy = Hierarchy %>% select('Indicator', 'Value.Type.Slug','Value.Type.Descriptor', 'Units', 'Rank.1',"Category.1.1",  "Category.1.2", "Category.1.3", "Category.1.4", "Category.1.5", "Rank.2", "Category.2.1", "Category.2.2", "Category.2.3", "Category.2.4", "Category.2.5", "Rank.3","Category.3.1", "Category.3.2", "Category.3.3", "Category.3.4")
 Master_IND = merge(df_IND, Hierarchy, by.x = 'Indicator', by.y = 'Indicator', all.x = T)
 
 ```
@@ -104,8 +104,44 @@ setdiff(df_IND$Indicator_Id, df$Indicator_Id)
 setdiff(df$Indicator_Id, df_IND$Indicator_Id)
 setdiff(df$Indicator, df_IND$Indicator)
 ```
+**Step 7:** Make sure the columns of Master_IND you have, match with the ones you need.
+```{r}
+# Rename columns
+colnames = colnames(Master_IND)
+colnames = gsub('Value.Type.Slug','Value_Type_Slug', colnames)
+colnames = gsub('Value.Type.Descriptor','Value_Type_Descriptor', colnames)
+colnames = gsub('Rank.1','Rank_1', colnames)
+colnames = gsub('Category.1.1','Category_11', colnames)
+colnames = gsub('Category.1.2','Category_12', colnames)
+colnames = gsub('Category.1.3','Category_13', colnames)
+colnames = gsub('Category.1.4','Category_14', colnames)
+colnames = gsub('Category.1.5','Category_15', colnames)
+colnames = gsub('Rank.2','Rank_2', colnames)
+colnames = gsub('Category.2.1','Category_21', colnames)
+colnames = gsub('Category.2.2','Category_22', colnames)
+colnames = gsub('Category.2.3','Category_23', colnames)
+colnames = gsub('Category.2.4','Category_24', colnames)
+colnames = gsub('Category.2.5','Category_25', colnames)
+colnames = gsub('Rank.3','Rank_3', colnames)
+colnames = gsub('Category.3.1','Category_31', colnames)
+colnames = gsub('Category.3.2','Category_32', colnames)
+colnames = gsub('Category.3.3','Category_33', colnames)
+colnames = gsub('Category.3.4','Category_34', colnames)
+colnames(Master_IND) = colnames
 
-**Step 7:** Write in csv the result
+# Create empty columns
+Master_IND$overlap = ''
+Master_IND$Indicator_Code = ''
+Master_IND$Description = ''
+
+#Read final file from 2017
+GovDataIND360 = read.csv("../Data preprocessed/GovData360IND.csv", sep = ";")
+
+setdiff(colnames(Master_IND), colnames(GovDataIND360))
+setdiff(colnames(GovDataIND360), colnames(Master_IND))
+```
+
+**Step 8:** Write in csv the result
 ```{r}
 Name.file = paste0("Cleaned files/",Data_Source, ".csv")
 Name.file_IND = paste0("Cleaned files/",Data_Source,"IND.csv")
