@@ -79,7 +79,8 @@ Hierarchy = read.csv("../Data preprocessed/hierarchy.indicators 12.31.17.csv")
 Hierarchy = Hierarchy %>% filter(Dataset == Data_Source)
 #View(Hierarchy)
 Hierarchy$Display.Name = trimws(Hierarchy$Display.Name, which = 'both')
-Hierarchy = Hierarchy %>% mutate(Indicator = paste(Display.Name, "-IBP-Total"))
+Hierarchy$Display.Name = gsub('-', '', Hierarchy$Display.Name)
+Hierarchy = Hierarchy %>% mutate(Indicator = paste(Display.Name, "-IBP-Total", sep =''))
 ```
 The indicators that do not match is because they might be dropped in the past. In any case, we will bring them until the end. They will have the categories and some other columns empty in the final dataset. At the last minute, we will dropped them if it proceeds.
 
