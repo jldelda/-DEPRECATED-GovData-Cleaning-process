@@ -18,7 +18,7 @@ library(dplyr)
 library(stringr)
 ```
 
-# 1) Join Vertically updated files
+# 1) Join Vertically updated files.
 
 ```{r}
 SOURCES2018 = c("BTI", "DB", "CPIA", "FH", "GCI", "IIAG", "ILO", "IPD", "IPU", "PEFA", "SC", "SGI", "TI", "WBL", "WGI", "WJP")
