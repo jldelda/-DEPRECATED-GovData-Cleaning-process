@@ -1,0 +1,43 @@
+---
+title: "Create GovData and GovDataIND"
+author: "Jose Luis Delgado Davara"
+date: "5/21/2018"
+output: html_document
+---
+
+
+This Rmarkdown is used to prepare the final files to send. This means:
+
+1. Join vertically all the updated files --> INDupdates2018.csv and updates_2018.csv
+2. Filter out the indicators without category assigned. From both IND and values files. (Drop.csv file)
+3. Get the not-updated indicators and values from previous ingestion (GovData2017 and GovData2017IND)
+4. Join vertically the files from (1) and (2) with the ones in (3)
+
+```{r libraries, include=FALSE}
+library(dplyr)
+library(stringr)
+```
+
+# 1) Join Vertically updated files
+
+```{r}
+SOURCES2018 = c("BTI", "DB", "CPIA", "FH", "GCI", "IIAG", "ILO", "IPD", "IPU", "PEFA", "SC", "SGI", "TI", "WBL", "WGI", "WJP")
+
+for (i in SOURCES2018){
+  # Read files
+  Route = paste0("1 Data cleaning/Cleaned files/",i,".csv")
+  RouteIND = paste0("1 Data cleaning/Cleaned files/",i,"IND.csv")
+  df = read.csv(Route, sep = ",")
+  dfIND = read.csv(RouteIND, sep = ",")
+     
+  print(i)
+  print(paste0("Number of columns imported in the .csv: ", ncol(df)))
+  print(paste0("Number of columns imported in the IND.csv: ", ncol(dfIND)))
+}  
+```
+
+
+
+```{r setup, include=FALSE}
+SOURCES = c("BEEPS", "BTI", "CDG", "CPIA", "DB", "ES", "FAD_FR", "FH", "FSI", "GCI", "GFS", "Global_Indicators", "Global_Integrity", "HRM", "IBP", "IIAG", "ILO", "IPD", "IPU", "PAM", "PAM_IAD", "PAY_EMP", "PEFA", "PFI", "PIM", "PIV", "QOG", "SC", "SGI","TI", "WBL", "WGI", "WJP")
+```
