@@ -88,8 +88,15 @@ The indicators that do not match, will have the categories and some other column
 **Step 5:** Left join between df_IND and Hierarchy.
 
 ```{r}
-Hierarchy = Hierarchy %>% select('Indicator', 'Value.Type.Slug','Value.Type.Descriptor', 'Units', 'Rank.1',"Category.1.1",  "Category.1.2", "Category.1.3", "Category.1.4", "Category.1.5", "Rank.2", "Category.2.1", "Category.2.2", "Category.2.3", "Category.2.4", "Category.2.5", "Rank.3","Category.3.1", "Category.3.2", "Category.3.3", "Category.3.4")
+Hierarchy = Hierarchy %>% select('Indicator', 'Display.Name', 'Value.Type.Slug','Value.Type.Descriptor', 'Units', 'Rank.1', "Category.1.1", "Category.1.2", "Category.1.3", "Category.1.4", "Category.1.5", "Rank.2", "Category.2.1", "Category.2.2", "Category.2.3", "Category.2.4", "Category.2.5", "Rank.3","Category.3.1", "Category.3.2", "Category.3.3", "Category.3.4", "Indicator.Code", "Indicator.ID")
+
 Master_IND = merge(df_IND, Hierarchy, by.x = 'Indicator', by.y = 'Indicator', all.x = T)
+
+# Drop and rename Display name. (In this case we will use the one in Hierarchy because it is cleaner)
+drop = c('Display.Name')
+Master_IND = Master_IND[ ,!(names(Master_IND) %in% drop)]
+#colnames(Master_IND)[6] = 'Display_Name'
+View(Master_IND)
 
 ```
 
