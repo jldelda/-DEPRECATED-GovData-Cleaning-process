@@ -100,7 +100,7 @@ df = df %>% mutate(Indicator = paste(Indicator, dataset, answer, sep = "-"))
 
 #Indicator_Id
 df = merge(df, df_IND[,c('Indicator','Indicator_Id')], by = 'Indicator', all.x = T)
-drop = c("indicator")
+drop = c("indicator", "Indicator_Name")
 df = df[ ,!(names(df) %in% drop)]
 
 # Check if all are matched

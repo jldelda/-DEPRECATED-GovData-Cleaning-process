@@ -50,14 +50,14 @@ dropIND = c("Display_Name_number")
 df_IND = df_IND[ ,!(names(df_IND) %in% dropIND)] #drop the auxiliary column created
 
 #Indicator
-df_IND$Display_Name = gsub("[[:digit:]]","", df_IND$Display_Name)
+df_IND$Display_Name = gsub("\\d\\d ","", df_IND$Display_Name)
 df_IND$Display_Name = trimws(df_IND$Display_Name, which = 'both')
 df_IND$Indicator = tolower(df_IND$Display_Name)
 
 df_IND = df_IND %>% mutate(Indicator = paste(Indicator, Dataset, answer, sep = "-"))
 
 # # Indicator in df
-df$question = gsub("[[:digit:]]","", df$question)
+df$question = gsub("\\d\\d ","", df$question)
 df$question = trimws(df$question, which = 'both')
 df$Indicator = tolower(df$question)
 
