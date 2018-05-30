@@ -11,6 +11,7 @@ This Rmarkdown is used to prepare the final files to send. This means:
 2. Filter out the indicators without category assigned. From both IND and values files. (Drop.csv file)
 3. Get the not-updated indicators and values from previous ingestion (GovData2017 and GovData2017IND)
 4. Join vertically the files from (1) and (2) with the ones in (3)
+5. Clean, match and fix legacy problems
 
 ```{r libraries, include=FALSE}
 library(dplyr)
@@ -120,7 +121,7 @@ length(unique(INDupdates2018$Indicator_Id))
 
 ```{r Read old files}
 # Read 2017 files
-GovData2017 = read.csv("../big files/GovData360.csv", sep = ";")
+GovData2017 = read.csv("../big files/GovData360.csv", sep = ",")
 GovDataIND2017 = read.csv("Data preprocessed/GovData360IND.csv", sep = ";")
 # Filter out the not updated ones
 GovData2017 = GovData2017[!(GovData2017$dataset %in% SOURCES2018), ]
@@ -139,7 +140,8 @@ colnames(INDupdates2018)
 INDupdates2018$Indicator_Code = INDupdates2018$Indicator_Id
 GovDataIND2017$Indicator.Code = 'not-updated spring18'
 GovDataIND2017$Indicator.ID = 'not-updated spring18'
-GovDataIND2017$indicator = 'not-updated in spring18'
+GovDataIND2017$indicator = GovDataIND2017$Display_Name
+#GovDataIND2017$indicator = 'not-updated in spring18'
 dropIND = c('X')
 INDupdates2018 = INDupdates2018[, !(names(INDupdates2018) %in% dropIND)] 
 colnames(INDupdates2018)[1] = 'indicator'
@@ -153,12 +155,11 @@ colnames(GovData2017)[19] = 'Indicator.Code'
 drop = c('keyN', 'country', 'Region', 'Incomegroup', 'Lendingcategory', 'OtherGroup', 'Indebtedness', 'D_FS', 'Indicator.Code')
 GovData2017 = GovData2017[, !(names(GovData2017) %in% drop)]
 colnames(GovData2017)
-colnames(updates2018)[1] = 'indicator'
+colnames(updates2018)[2] = 'indicator'
 updates2018$Indicator_Name = updates2018$question
 
-drop2 = c('X', 'encoded', 'indicator')
+drop2 = c('X', 'encoded')
 updates2018 = updates2018[, !(names(updates2018) %in% drop2)]
-colnames(updates2018)[1] = 'indicator'
 
   # Comprobation
 setdiff(colnames(GovData2017), colnames(updates2018))
@@ -167,10 +168,9 @@ setdiff(colnames(updates2018), colnames(GovData2017))
 
 There are inconsistencies between the two files with the Indicator_Name. Let's rename the column indicator and make them consistent.
 ```{r Solve the Indicator_Name problem}
-
-
+GovDataIND2017$indicator = GovDataIND2017$Indicator_Name
+GovData2017$indicator = GovData2017$Indicator_Name
 ```
-
 
 ```{r vertical join}
 # Vertical join
@@ -181,16 +181,68 @@ drop = c('category_15')
 GovData360 = GovData360[, !(names(GovData360) %in% drop)]
 GovData360IND$overlap[is.na(GovData360IND$overlap)] = 'GOV'
 
-  # Comprobation
 setdiff(unique(GovData360$Indicator_Id), unique(GovData360IND$Indicator_Id))
 setdiff(unique(GovData360IND$Indicator_Id), unique(GovData360$Indicator_Id))
-
-setdiff(unique(GovData360$indicator), unique(GovData360IND$indicator))
-setdiff(unique(GovData360IND$indicator), unique(GovData360$indicator))
-
-
-
 ```
+
+## 5) Clean, match and fix legacy problems
+
+After doing this, there are some legacy indicators in the IND file that are not present in the values file. 
+
+On the other hand, there are some values with empty Indicator_Id that are not present in the IND files - These are the ones with value == 'NA'.
+
+### Indicator_Id
+```{r}
+# Comprobation
+setdiff(unique(GovData360$Indicator_Id), unique(GovData360IND$Indicator_Id))
+GovData360 = GovData360[GovData360$Indicator_Id != "", ]
+
+setdiff(unique(GovData360IND$Indicator_Id), unique(GovData360$Indicator_Id))
+# There are indicators without values. Remove them.
+
+diff = setdiff(unique(GovData360IND$Indicator_Id), unique(GovData360$Indicator_Id)) # list of indicators without data
+GovData360IND = GovData360IND[!(GovData360IND$Indicator_Id %in% diff), ] # Remove indicators without data from the IND file
+
+setdiff(unique(GovData360$Indicator_Id), unique(GovData360IND$Indicator_Id))
+setdiff(unique(GovData360IND$Indicator_Id), unique(GovData360$Indicator_Id))
+```
+
+### Indicator_Name
+
+'Indicator_Name' does not match either. This is because the cleaning system has been different in each file and dataset. It is not a big problem now because we have the Indicator_Id as an ID. 
+
+```{r}
+ID.match = GovData360IND[, c('Indicator_Id', 'Indicator_Name')]
+
+drop_Indicator_Name = c('Indicator_Name')
+GovData360 = GovData360[, !(names(GovData360) %in% drop_Indicator_Name)]
+# Match 
+GovData360 = merge(GovData360, ID.match, by = 'Indicator_Id', all = T)
+
+# Comprobation
+setdiff(unique(GovData360$Indicator_Name), unique(GovData360IND$Indicator_Name))
+setdiff(unique(GovData360IND$Indicator_Name), unique(GovData360$Indicator_Name))
+```
+
+### Iso3
+There are some erroneous country iso3 codes. Let's fix it.
+
+```{r}
+# Clean manually the ones we know are not correct
+GovData360$iso3[GovData360$iso3 == 'AND'] = 'ADO'
+GovData360$iso3[GovData360$iso3 == 'COD'] = 'ZAR'
+GovData360$iso3[GovData360$iso3 == 'IMN'] = 'IMY'
+GovData360$iso3[GovData360$iso3 == 'RCA'] = 'CAF'
+GovData360$iso3[GovData360$iso3 == 'RKS'] = 'KSV'
+GovData360$iso3[GovData360$iso3 == 'ROU'] = 'ROM'
+GovData360$iso3[GovData360$iso3 == 'UAE'] = 'ARE'
+GovData360$iso3[GovData360$iso3 == 'YUG'] = 'SRB'
+
+ISO3 = read.csv('aux_Data/COUNTRIES_ISO3.csv', sep = ",")
+ISO3 = t(ISO3)
+GovData360 = GovData360[(GovData360$iso3 %in% ISO3),]
+```
+
 
 ```{r write in csv}
 # Write in csv

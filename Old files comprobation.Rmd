@@ -1,0 +1,25 @@
+---
+title: "Old files comparobation"
+author: "Jose Luis Delgado Davara"
+date: "5/30/2018"
+output: html_document
+---
+
+This file checks discrepancies between the two files GovData and GovDataIND of the 2017 ingestion.
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+Data2017 = read.csv("../Ingestion Fall 2017 - Regina Files/GovData360.csv", sep = ";")
+DataIND2017 = read.csv("../Ingestion Fall 2017 - Regina Files/GovData360IND.csv", sep = ";")
+colnames(DataIND2017)
+```
+
+```{r}
+setdiff(unique(Data2017$Indicator_Id), unique(DataIND2017$Indicator_Id))
+setdiff(unique(DataIND2017$Indicator_Id), unique(Data2017$Indicator_Id))
+```
+
+There are 549 indicators in the Fall 2017 ingestion that do not match in the two files. The INDICATORS files have more that the values file.
