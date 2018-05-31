@@ -191,6 +191,25 @@ After doing this, there are some legacy indicators in the IND file that are not 
 
 On the other hand, there are some values with empty Indicator_Id that are not present in the IND files - These are the ones with value == 'NA'.
 
+### Iso3
+There are some erroneous country iso3 codes. Let's fix it.
+
+```{r}
+# Clean manually the ones we know are not correct
+GovData360$iso3[GovData360$iso3 == 'AND'] = 'ADO'
+GovData360$iso3[GovData360$iso3 == 'COD'] = 'ZAR'
+GovData360$iso3[GovData360$iso3 == 'IMN'] = 'IMY'
+GovData360$iso3[GovData360$iso3 == 'RCA'] = 'CAF'
+GovData360$iso3[GovData360$iso3 == 'RKS'] = 'KSV'
+GovData360$iso3[GovData360$iso3 == 'ROU'] = 'ROM'
+GovData360$iso3[GovData360$iso3 == 'UAE'] = 'ARE'
+GovData360$iso3[GovData360$iso3 == 'YUG'] = 'SRB'
+
+ISO3 = read.csv('aux_Data/COUNTRIES_ISO3.csv', sep = ",")
+ISO3 = t(ISO3)
+GovData360 = GovData360[(GovData360$iso3 %in% ISO3),]
+```
+
 ### Indicator_Id
 ```{r}
 # Comprobation
@@ -223,26 +242,6 @@ GovData360 = merge(GovData360, ID.match, by = 'Indicator_Id', all = T)
 setdiff(unique(GovData360$Indicator_Name), unique(GovData360IND$Indicator_Name))
 setdiff(unique(GovData360IND$Indicator_Name), unique(GovData360$Indicator_Name))
 ```
-
-### Iso3
-There are some erroneous country iso3 codes. Let's fix it.
-
-```{r}
-# Clean manually the ones we know are not correct
-GovData360$iso3[GovData360$iso3 == 'AND'] = 'ADO'
-GovData360$iso3[GovData360$iso3 == 'COD'] = 'ZAR'
-GovData360$iso3[GovData360$iso3 == 'IMN'] = 'IMY'
-GovData360$iso3[GovData360$iso3 == 'RCA'] = 'CAF'
-GovData360$iso3[GovData360$iso3 == 'RKS'] = 'KSV'
-GovData360$iso3[GovData360$iso3 == 'ROU'] = 'ROM'
-GovData360$iso3[GovData360$iso3 == 'UAE'] = 'ARE'
-GovData360$iso3[GovData360$iso3 == 'YUG'] = 'SRB'
-
-ISO3 = read.csv('aux_Data/COUNTRIES_ISO3.csv', sep = ",")
-ISO3 = t(ISO3)
-GovData360 = GovData360[(GovData360$iso3 %in% ISO3),]
-```
-
 
 ```{r write in csv}
 # Write in csv
