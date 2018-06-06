@@ -2,7 +2,8 @@
 This Repo has been calified as Deprecated because some large files (larger than 100 MB) have been commited in local. 
 When I tried to push them, github does not allow to push so big files into the system. 
 
-The package BFG do not work for Windows, so I had to copy manually all updated files (expect the biog ones) in a new repository.
+The package BFG do not work for Windows, so I had to copy manually all updated files (expect the biog ones) in
+a new repository.
 ```
 See here the new GovData-Cleaning-process repository.
 
